@@ -1,6 +1,7 @@
 /images/
-/msedgedriver.exe
+msedgedriver.exe
 .idea
+.cursorignore
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

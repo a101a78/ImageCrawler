@@ -2,10 +2,11 @@ import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
 from config import *
+from state_manager import *
 
 
 def init_driver(service):
@@ -21,7 +22,7 @@ def search_for_images(driver, keyword):
     search_box.send_keys(Keys.ENTER)
 
     WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '//*[@id="islrg"]/div[1]/div[1]/a[1]/div[1]/img'))
+        ec.presence_of_element_located((By.XPATH, '//*[@id="islrg"]/div[1]/div[1]/a[1]/div[1]/img'))
     )
 
 
@@ -39,6 +40,7 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
             result = downloader(src, folder_path, existing_images)
             if result == "SUCCESS":
                 print(f"[RETRY-SUCCESS] {src}")
+                increment_saved_images_count()
             elif result == "EXISTS":
                 print(f"[RETRY-EXISTS] {src}")
             elif result == "FAIL":
@@ -49,6 +51,7 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
             print("Finish the crawl because there are no more new images.")
+            print(f"Total saved images: {get_saved_images_count()}")
             break  # 더 이상 새로운 이미지가 로드되지 않으면 종료
         last_height = new_height
 
@@ -70,7 +73,7 @@ def collect_images(driver, image_urls, existing_images, folder_path, failed_imag
             driver.execute_script("arguments[0].click();", image)
             time.sleep(WAIT_DELAY)
             high_res_image = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 'img.sFlh5c.pT0Scc.iPVvYb'))
+                ec.presence_of_element_located((By.CSS_SELECTOR, 'img.sFlh5c.pT0Scc.iPVvYb'))
             )
             src = high_res_image.get_attribute('src')
             if src.startswith('http') and src not in image_urls:
@@ -78,10 +81,11 @@ def collect_images(driver, image_urls, existing_images, folder_path, failed_imag
                 result = downloader(src, folder_path, existing_images)
                 if result == "SUCCESS":
                     print(f"[SUCCESS] {src}")
+                    increment_saved_images_count()
                 elif result == "EXISTS":
                     print(f"[EXISTS] {src}")
                 elif result == "FAIL":
-                    failed_images.add(src)
                     print(f"[FAIL] {src}")
+                    failed_images.add(src)
         except Exception as e:
             print(f"[ERROR] {type(e).__name__}")

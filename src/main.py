@@ -3,8 +3,8 @@ import threading
 
 from selenium.webdriver.edge.service import Service
 
-from config import stop_crawling
 from crawler import init_driver, search_for_images, scroll_and_collect_images
+from state_manager import stop_crawling, get_saved_images_count
 
 
 def monitor_stop():
@@ -13,6 +13,7 @@ def monitor_stop():
         if key == 'q':
             stop_crawling.set()
             print("Interrupted by user input.")
+            print(f"Total saved images: {get_saved_images_count()}")
             break
 
 
