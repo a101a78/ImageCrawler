@@ -1,3 +1,4 @@
+import sys
 import time
 
 from selenium.webdriver.common.by import By
@@ -65,6 +66,7 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
         collect_images(driver, image_urls, existing_images, folder_path, failed_images)
 
     driver.close()
+    sys.exit()
 
 
 def collect_images(driver, image_urls, existing_images, folder_path, failed_images):
