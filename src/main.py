@@ -1,7 +1,6 @@
 import os
 import threading
 
-import keyboard
 from selenium.webdriver.edge.service import Service
 
 from config import stop_crawling
@@ -9,10 +8,12 @@ from crawler import init_driver, search_for_images, scroll_and_collect_images
 
 
 def monitor_stop():
-    print("To stop the crawl, type 'q' and press Enter.")
-    keyboard.wait('q')
-    stop_crawling.set()
-    print("Interrupted by user input.")
+    while True:
+        key = input("To stop the crawl, type 'q' and press Enter.\n")
+        if key == 'q':
+            stop_crawling.set()
+            print("Interrupted by user input.")
+            break
 
 
 def save_image(keyword, folder_path="images"):
