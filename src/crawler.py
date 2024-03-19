@@ -48,6 +48,7 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
 
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
+            print("Finish the crawl because there are no more new images.")
             break  # 더 이상 새로운 이미지가 로드되지 않으면 종료
         last_height = new_height
 
