@@ -37,15 +37,22 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
 
         # 새로운 페이지가 로드될 때마다 실패한 이미지 재시도
         for src in list(failed_images):
-            result = downloader(src, folder_path, existing_images)
-            if result == "SUCCESS":
-                print(f"[RETRY-SUCCESS] {src}")
-                increment_saved_images_count()
-            elif result == "EXISTS":
-                print(f"[RETRY-EXISTS] {src}")
-            elif result == "FAIL":
-                print(f"[RETRY-FAIL] {src}")
-            time.sleep(WAIT_DELAY)
+            retry_count = 0
+            while retry_count < RETRY_LIMIT:
+                result = downloader(src, folder_path, existing_images)
+                if result == "SUCCESS":
+                    print(f"[RETRY-SUCCESS] {src}")
+                    increment_saved_images_count()
+                    break
+                elif result == "EXISTS":
+                    print(f"[RETRY-EXISTS] {src}")
+                    break
+                elif result == "FAIL":
+                    print(f"[RETRY-FAIL] {src}")
+                    retry_count += 1
+                time.sleep(WAIT_DELAY)
+            if retry_count == RETRY_LIMIT:
+                print(f"[RETRY-LIMIT-REACHED] {src}")
         failed_images.clear()
 
         new_height = driver.execute_script("return document.body.scrollHeight")
@@ -86,6 +93,6 @@ def collect_images(driver, image_urls, existing_images, folder_path, failed_imag
                     print(f"[EXISTS] {src}")
                 elif result == "FAIL":
                     print(f"[FAIL] {src}")
-                    failed_images.add(src)
         except Exception as e:
             print(f"[ERROR] {type(e).__name__}")
+            failed_images.add(src)
