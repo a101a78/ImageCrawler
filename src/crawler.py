@@ -5,7 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from config import stop_crawling
+from config import *
 
 
 def init_driver(service):
@@ -32,7 +32,7 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
 
     while not stop_crawling.is_set():
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)  # 스크롤 후 페이지 로드 대기
+        time.sleep(LOAD_DELAY)  # 스크롤 후 페이지 로드 대기
 
         # 새로운 페이지가 로드될 때마다 실패한 이미지 재시도
         for src in list(failed_images):
@@ -43,6 +43,7 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
                 print(f"[RETRY-EXISTS] {src}")
             elif result == "FAIL":
                 print(f"[RETRY-FAIL] {src}")
+            time.sleep(WAIT_DELAY)
         failed_images.clear()
 
         new_height = driver.execute_script("return document.body.scrollHeight")
@@ -66,7 +67,7 @@ def collect_images(driver, image_urls, existing_images, folder_path, failed_imag
             continue
         try:
             driver.execute_script("arguments[0].click();", image)
-            time.sleep(1)
+            time.sleep(WAIT_DELAY)
             high_res_image = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'img.sFlh5c.pT0Scc.iPVvYb'))
             )
