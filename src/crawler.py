@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
+from color_formatter import log_with_color
 from config import *
 from state_manager import *
 
@@ -41,7 +42,7 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
             retry_count = 0
             while retry_count < RETRY_LIMIT:
                 result = downloader(src, folder_path, existing_images)
-                print(f"[RETRY-{result}] {src}")
+                log_with_color(result, result, src)
                 if result == "SUCCESS":
                     increment_saved_images_count()
                     break
@@ -51,7 +52,7 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
                     retry_count += 1
                 time.sleep(WAIT_DELAY)
             if retry_count == RETRY_LIMIT:
-                print(f"[RETRY-LIMIT-REACHED] {src}")
+                log_with_color("FAIL", "RETRY-LIMIT-REACHED", src)
         failed_images.clear()
 
         new_height = driver.execute_script("return document.body.scrollHeight")
@@ -69,14 +70,11 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
 
 def collect_images(driver, image_urls, existing_images, folder_path, failed_images):
     from image_handler import downloader
-    current_image_count = len(image_urls)
     images = driver.find_elements(By.CSS_SELECTOR, 'img.rg_i.Q4LuWd')
-    for index, image in enumerate(images):
+    for image in images:
         src = None
         if stop_crawling.is_set():
             break
-        if index < current_image_count:
-            continue
         try:
             driver.execute_script("arguments[0].click();", image)
             time.sleep(WAIT_DELAY)
@@ -84,13 +82,13 @@ def collect_images(driver, image_urls, existing_images, folder_path, failed_imag
                 ec.presence_of_element_located((By.CSS_SELECTOR, 'img.sFlh5c.pT0Scc.iPVvYb'))
             )
             src = high_res_image.get_attribute('src')
-            if src.startswith('http') and src not in image_urls:
+            if src and src.startswith('http') and src not in image_urls:
                 image_urls.add(src)
                 result = downloader(src, folder_path, existing_images)
-                print(f"[{result}] {src}")
+                log_with_color(result, result, src)
                 if result == "SUCCESS":
                     increment_saved_images_count()
         except Exception as e:
             if src:
-                print(f"[ERROR] {type(e).__name__}")
+                log_with_color("ERROR", "ERROR", type(e).__name__)
                 failed_images.add(src)
