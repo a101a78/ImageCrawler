@@ -74,6 +74,7 @@ def collect_images(driver, image_urls, existing_images, folder_path, failed_imag
     current_image_count = len(image_urls)
     images = driver.find_elements(By.CSS_SELECTOR, 'img.rg_i.Q4LuWd')
     for index, image in enumerate(images):
+        src = None
         if stop_crawling.is_set():
             break
         if index < current_image_count:
@@ -96,5 +97,6 @@ def collect_images(driver, image_urls, existing_images, folder_path, failed_imag
                 elif result == "FAIL":
                     print(f"[FAIL] {src}")
         except Exception as e:
-            print(f"[ERROR] {type(e).__name__}")
-            failed_images.add(src)
+            if src:
+                print(f"[ERROR] {type(e).__name__}")
+                failed_images.add(src)
