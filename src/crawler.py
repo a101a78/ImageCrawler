@@ -41,15 +41,13 @@ def scroll_and_collect_images(driver, existing_images, folder_path, failed_image
             retry_count = 0
             while retry_count < RETRY_LIMIT:
                 result = downloader(src, folder_path, existing_images)
+                print(f"[RETRY-{result}] {src}")
                 if result == "SUCCESS":
-                    print(f"[RETRY-SUCCESS] {src}")
                     increment_saved_images_count()
                     break
                 elif result == "EXISTS":
-                    print(f"[RETRY-EXISTS] {src}")
                     break
                 elif result == "FAIL":
-                    print(f"[RETRY-FAIL] {src}")
                     retry_count += 1
                 time.sleep(WAIT_DELAY)
             if retry_count == RETRY_LIMIT:
@@ -89,13 +87,11 @@ def collect_images(driver, image_urls, existing_images, folder_path, failed_imag
             if src.startswith('http') and src not in image_urls:
                 image_urls.add(src)
                 result = downloader(src, folder_path, existing_images)
+                print(f"[{result}] {src}")
                 if result == "SUCCESS":
-                    print(f"[SUCCESS] {src}")
                     increment_saved_images_count()
-                elif result == "EXISTS":
-                    print(f"[EXISTS] {src}")
                 elif result == "FAIL":
-                    print(f"[FAIL] {src}")
+                    failed_images.add(src)
         except Exception as e:
             if src:
                 print(f"[ERROR] {type(e).__name__}")
