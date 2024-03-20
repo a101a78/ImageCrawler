@@ -90,8 +90,6 @@ def collect_images(driver, image_urls, existing_images, folder_path, failed_imag
                 print(f"[{result}] {src}")
                 if result == "SUCCESS":
                     increment_saved_images_count()
-                elif result == "FAIL":
-                    failed_images.add(src)
         except Exception as e:
             if src:
                 print(f"[ERROR] {type(e).__name__}")
